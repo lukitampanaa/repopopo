@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark light">
+  <title>Luma AI</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700&display=swap');
+
+    :root {
+      --bg: #080b16;
+      --bg-soft: #11162a;
+      --glass: rgba(19, 25, 47, .58);
+      --glass-solid: rgba(20, 26, 48, .94);
+      --glass-hover: rgba(255, 255, 255, .09);
+      --line: rgba(255, 255, 255, .1);
+      --line-strong: rgba(255, 255, 255, .17);
+      --text: #f5f6fb;
+      --muted: #989fb4;
+      --accent: #9b8cff;
+      --accent-2: #60d9ca;
+      --danger: #ff6f86;
+      --shadow: 0 24px 70px rgba(0, 0, 0, .32);
+      --radius: 24px;
+    }
+
+    body.light {
+      --bg: #e9edf6;
+      --bg-soft: #dce4f1;
+      --glass: rgba(255, 255, 255, .56);
+      --glass-solid: rgba(247, 249, 255, .95);
+      --glass-hover: rgba(255, 255, 255, .7);
+      --line: rgba(31, 41, 72, .1);
+      --line-strong: rgba(31, 41, 72, .17);
+      --text: #161a2b;
+      --muted: #697086;
+      --shadow: 0 24px 70px rgba(57, 70, 104, .18);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      color: var(--text);
+      background: var(--bg);
+      font-family: "DM Sans", system-ui, sans-serif;
+      transition: background .3s, color .3s;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { color: inherit; }
+    ::selection { background: rgba(155, 140, 255, .35); }
+    ::-webkit-scrollbar { width: 7px; }
+    ::-webkit-scrollbar-thumb { background: rgba(147, 154, 180, .25); border-radius: 20px; }
+
+    .aurora { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .25; animation: drift 14s ease-in-out infinite alternate; }
+    .orb.one { width: 45vw; height: 45vw; background: #745eff; top: -23vw; left: 15vw; }
+    .orb.two { width: 38vw; height: 38vw; background: #22cfc1; right: -18vw; bottom: -20vw; animation-delay: -5s; }
+    .orb.three { width: 24vw; height: 24vw; background: #cc63b9; left: 32vw; bottom: -20vw; animation-delay: -9s; }
+    .noise { position: fixed; inset: 0; opacity: .025; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+    @keyframes drift { to { transform: translate(6vw, 5vw) scale(1.08); } }
+
+    .app { position: relative; z-index: 1; display: grid; grid-template-columns: 290px 1fr; height: 100dvh; padding: 14px; gap: 14px; }
+    .glass { background: var(--glass); border: 1px solid var(--line); box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.08); backdrop-filter: blur(28px) saturate(145%); -webkit-backdrop-filter: blur(28px) saturate(145%); }
+
+    .sidebar { border-radius: 28px; padding: 16px; display: flex; flex-direction: column; min-width: 0; }
+    .brand { height: 48px; display: flex; align-items: center; gap: 11px; padding: 0 8px; margin-bottom: 18px; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(145deg, var(--accent), #7160ef); box-shadow: 0 8px 24px rgba(120, 98, 245, .35), inset 0 1px 1px rgba(255,255,255,.45); }
+    .brand-mark svg { width: 19px; }
+    .brand b { font-family: Manrope, sans-serif; font-size: 18px; letter-spacing: -.5px; }
+    .brand small { display: block; color: var(--muted); font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; }
+
+    .new-chat { width: 100%; height: 46px; border: 1px solid var(--line-strong); border-radius: 15px; background: rgba(255,255,255,.07); display: flex; align-items: center; justify-content: center; gap: 9px; cursor: pointer; transition: .2s; font-weight: 600; }
+    .new-chat:hover:not(:disabled) { transform: translateY(-1px); background: rgba(155,140,255,.17); border-color: rgba(155,140,255,.5); }
+    .new-chat:disabled { opacity: .38; cursor: not-allowed; }
+    .icon { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+    .history-label { margin: 24px 8px 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.2px; font-size: 10px; font-weight: 700; }
+    .session-list { overflow-y: auto; flex: 1; margin: 0 -5px; padding: 0 5px; }
+    .session { position: relative; display: flex; align-items: center; width: 100%; min-height: 50px; padding: 8px 38px 8px 12px; border: 1px solid transparent; border-radius: 14px; background: transparent; cursor: pointer; text-align: left; margin-bottom: 4px; transition: .18s; }
+    .session:hover { background: var(--glass-hover); }
+    .session.active { background: rgba(155,140,255,.13); border-color: rgba(155,140,255,.22); }
+    .session-copy { min-width: 0; pointer-events: none; }
+    .session-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; font-weight: 600; }
+    .session-time { color: var(--muted); font-size: 10px; margin-top: 3px; }
+    .delete-session { position: absolute; right: 7px; top: 10px; width: 29px; height: 29px; border: 0; border-radius: 9px; background: transparent; display: none; place-items: center; cursor: pointer; color: var(--muted); }
+    .session:hover .delete-session, .session.active .delete-session { display: grid; }
+    .delete-session:hover { color: var(--danger); background: rgba(255,111,134,.1); }
+    .delete-session .icon { width: 15px; }
+
+    .profile-card { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 12px; display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 38px; height: 38px; border-radius: 13px; object-fit: cover; flex: none; background: linear-gradient(135deg, #8874ff, #44caba); display: grid; place-items: center; color: white; font-weight: 700; overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-info { min-width: 0; flex: 1; }
+    .profile-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .profile-plan { color: var(--muted); font-size: 10px; margin-top: 2px; }
+    .icon-btn { width: 38px; height: 38px; border: 1px solid transparent; border-radius: 12px; background: transparent; display: grid; place-items: center; cursor: pointer; transition: .18s; }
+    .icon-btn:hover { background: var(--glass-hover); border-color: var(--line); }
+
+    .main { border-radius: 28px; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .topbar { height: 72px; flex: none; border-bottom: 1px solid var(--line); display: flex; align-items: center; padding: 0 24px; gap: 12px; }
+    .mobile-menu { display: none; }
+    .model-button { display: flex; align-items: center; gap: 9px; border: 0; background: transparent; cursor: pointer; padding: 8px 10px; border-radius: 12px; }
+    .model-button:hover { background: var(--glass-hover); }
+    .model-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 13px var(--accent-2); }
+    .model-name { font-family: Manrope, sans-serif; font-size: 14px; font-weight: 700; }
+    .model-endpoint { font-size: 10px; color: var(--muted); max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .top-spacer { flex: 1; }
+    .connection { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }
+    .connection i { width: 6px; height: 6px; background: var(--accent-2); border-radius: 50%; }
+
+    .chat { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
+    .chat-inner { width: min(840px, calc(100% - 42px)); min-height: 100%; margin: 0 auto; padding: 28px 0 22px; display: flex; flex-direction: column; }
+    .empty { margin: auto; width: 100%; padding: 40px 0; animation: rise .55s both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+    .empty-orb { width: 76px; height: 76px; margin: 0 auto 23px; border-radius: 27px; display: grid; place-items: center; background: linear-gradient(145deg, rgba(155,140,255,.28), rgba(96,217,202,.12)); border: 1px solid rgba(255,255,255,.16); box-shadow: 0 15px 50px rgba(124,106,240,.2), inset 0 1px 1px rgba(255,255,255,.2); transform: rotate(-4deg); }
+    .empty-orb svg { width: 33px; color: #c0b7ff; }
+    .empty h1 { font-family: Manrope, sans-serif; font-size: clamp(28px, 4vw, 43px); line-height: 1.1; letter-spacing: -1.7px; text-align: center; margin: 0; }
+    .empty h1 span { color: transparent; background: linear-gradient(90deg, #b6aaff, #6ee1d5); -webkit-background-clip: text; background-clip: text; }
+    .empty > p { color: var(--muted); text-align: center; margin: 13px auto 34px; max-width: 490px; font-size: 14px; line-height: 1.65; }
+    .suggestions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .suggestion { min-height: 105px; padding: 15px; text-align: left; color: var(--text); border: 1px solid var(--line); background: rgba(255,255,255,.045); border-radius: 18px; cursor: pointer; transition: .2s; }
+    .suggestion:hover { transform: translateY(-2px); background: rgba(255,255,255,.08); border-color: rgba(155,140,255,.32); }
+    .suggestion .icon { color: var(--accent); margin-bottom: 14px; }
+    .suggestion b { display: block; font-size: 12px; margin-bottom: 4px; }
+    .suggestion span { color: var(--muted); font-size: 11px; line-height: 1.4; }
+
+    .messages { display: flex; flex-direction: column; gap: 26px; padding: 8px 0 30px; }
+    .message { display: grid; grid-template-columns: 35px minmax(0, 1fr); gap: 13px; animation: rise .3s both; }
+    .message.user { grid-template-columns: minmax(0, 1fr) 35px; }
+    .message.user .message-body { order: -1; background: rgba(155,140,255,.14); border: 1px solid rgba(155,140,255,.22); border-radius: 19px 7px 19px 19px; justify-self: end; max-width: 82%; padding: 12px 15px; }
+    .message-avatar { width: 35px; height: 35px; border-radius: 12px; display: grid; place-items: center; overflow: hidden; background: linear-gradient(135deg, #8874ff, #44caba); font-size: 12px; font-weight: 700; }
+    .message-avatar.ai { background: rgba(155,140,255,.15); border: 1px solid rgba(155,140,255,.28); color: #bdb3ff; }
+    .message-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .message-body { min-width: 0; padding-top: 5px; font-size: 14px; line-height: 1.75; }
+    .message-meta { color: var(--muted); font-size: 10px; margin-bottom: 5px; }
+    .message-content { word-break: break-word; }
+    .message-content p { margin: 0 0 11px; }
+    .message-content p:last-child { margin-bottom: 0; }
+    .message-content pre { overflow: auto; background: rgba(0,0,0,.25); border: 1px solid var(--line); border-radius: 13px; padding: 14px; line-height: 1.55; }
+    .message-content code { font-family: Consolas, monospace; font-size: 12px; background: rgba(127,127,127,.14); padding: 2px 5px; border-radius: 5px; }
+    .message-content pre code { background: transparent; padding: 0; }
+    .message-actions { margin-top: 9px; display: flex; gap: 5px; opacity: 0; transition: .2s; }
+    .message:hover .message-actions { opacity: 1; }
+    .mini-btn { border: 0; color: var(--muted); background: transparent; padding: 4px 7px; border-radius: 7px; cursor: pointer; font-size: 10px; }
+    .mini-btn:hover { background: var(--glass-hover); color: var(--text); }
+    .thinking { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+    .thinking-dots { display: flex; gap: 3px; }
+    .thinking-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: pulse 1s infinite alternate; }
+    .thinking-dots i:nth-child(2) { animation-delay: .2s; }
+    .thinking-dots i:nth-child(3) { animation-delay: .4s; }
+    @keyframes pulse { to { opacity: .25; transform: translateY(-3px); } }
+    .search-note { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 99px; padding: 4px 8px; color: var(--muted); font-size: 10px; margin-bottom: 10px; }
+
+    .composer-area { flex: none; padding: 0 22px 18px; }
+    .composer { max-width: 860px; margin: 0 auto; border: 1px solid var(--line-strong); border-radius: 23px; padding: 9px 10px 9px 14px; background: rgba(14,18,34,.64); box-shadow: 0 15px 45px rgba(0,0,0,.2), inset 0 1px rgba(255,255,255,.06); backdrop-filter: blur(30px); transition: border .2s, box-shadow .2s; }
+    body.light .composer { background: rgba(255,255,255,.64); }
+    .composer:focus-within { border-color: rgba(155,140,255,.48); box-shadow: 0 15px 45px rgba(0,0,0,.18), 0 0 0 3px rgba(155,140,255,.08); }
+    #prompt { border: 0; outline: 0; resize: none; width: 100%; min-height: 34px; max-height: 150px; padding: 7px 4px; color: var(--text); background: transparent; line-height: 1.5; font-size: 14px; }
+    #prompt::placeholder { color: var(--muted); }
+    .composer-row { display: flex; align-items: center; gap: 6px; }
+    .tool-pill { height: 32px; display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 10px; padding: 0 9px; background: transparent; color: var(--muted); cursor: pointer; font-size: 10px; transition: .18s; }
+    .tool-pill .icon { width: 14px; }
+    .tool-pill.active { color: #bdb4ff; border-color: rgba(155,140,255,.35); background: rgba(155,140,255,.1); }
+    .composer-spacer { flex: 1; }
+    .send { width: 36px; height: 36px; border: 0; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(145deg, #a192ff, #7462ee); color: white; cursor: pointer; box-shadow: 0 7px 20px rgba(117,98,238,.32); transition: .2s; }
+    .send:hover:not(:disabled) { transform: scale(1.04); }
+    .send:disabled { opacity: .3; cursor: not-allowed; box-shadow: none; }
+    .send.stop svg { fill: currentColor; }
+    .disclaimer { text-align: center; color: var(--muted); font-size: 9px; margin-top: 8px; }
+
+    .scrim { position: fixed; z-index: 20; inset: 0; background: rgba(4,6,14,.55); backdrop-filter: blur(9px); opacity: 0; pointer-events: none; transition: .25s; }
+    .scrim.show { opacity: 1; pointer-events: auto; }
+    .modal { position: fixed; z-index: 21; inset: 50% auto auto 50%; width: min(610px, calc(100% - 30px)); max-height: min(760px, calc(100dvh - 30px)); overflow: auto; transform: translate(-50%, -46%) scale(.97); opacity: 0; pointer-events: none; background: var(--glass-solid); border: 1px solid var(--line-strong); border-radius: 27px; box-shadow: 0 30px 100px rgba(0,0,0,.45), inset 0 1px rgba(255,255,255,.1); backdrop-filter: blur(35px); transition: .25s; }
+    .modal.show { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+    .modal-head { padding: 21px 23px 17px; display: flex; align-items: center; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--glass-solid); z-index: 2; }
+    .modal-head h2 { font: 700 18px Manrope, sans-serif; margin: 0; flex: 1; }
+    .modal-body { padding: 22px 23px; }
+    .section-title { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); font-weight: 700; margin: 4px 0 12px; }
+    .field { margin-bottom: 15px; }
+    .field label { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; margin-bottom: 7px; }
+    .field label span { color: var(--muted); font-weight: 400; }
+    .input, .select { width: 100%; height: 43px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); outline: 0; color: var(--text); background: rgba(127,127,127,.07); transition: .2s; }
+    .input:focus, .select:focus { border-color: rgba(155,140,255,.5); box-shadow: 0 0 0 3px rgba(155,140,255,.08); }
+    .select option { background: var(--bg-soft); }
+    .api-wrap { position: relative; }
+    .api-wrap .input { padding-right: 45px; }
+    .api-wrap .icon-btn { position: absolute; right: 3px; top: 3px; width: 37px; height: 37px; }
+    .field-help { color: var(--muted); font-size: 10px; line-height: 1.5; margin-top: 6px; }
+    .field-help a { color: var(--accent); }
+    .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .divider { height: 1px; background: var(--line); margin: 22px 0; }
+    .toggle-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; }
+    .toggle-copy { flex: 1; }
+    .toggle-copy b { display: block; font-size: 12px; }
+    .toggle-copy span { display: block; color: var(--muted); font-size: 10px; margin-top: 3px; }
+    .switch { width: 42px; height: 24px; border-radius: 20px; background: rgba(127,127,127,.25); border: 0; padding: 3px; cursor: pointer; transition: .2s; }
+    .switch::after { content: ""; display: block; width: 18px; height: 18px; border-radius: 50%; background: white; box-shadow: 0 2px 5px rgba(0,0,0,.3); transition: .2s; }
+    .switch.on { background: var(--accent); }
+    .switch.on::after { transform: translateX(18px); }
+    .modal-foot { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 9px; padding: 15px 23px 20px; background: var(--glass-solid); border-top: 1px solid var(--line); }
+    .btn { height: 40px; padding: 0 17px; border-radius: 12px; border: 1px solid var(--line); background: transparent; cursor: pointer; font-weight: 600; font-size: 11px; }
+    .btn:hover { background: var(--glass-hover); }
+    .btn.primary { border: 0; color: white; background: linear-gradient(145deg, #9d8eff, #7160eb); }
+    .avatar-editor { display: flex; align-items: center; gap: 15px; margin-bottom: 21px; }
+    .avatar-editor .avatar { width: 64px; height: 64px; border-radius: 20px; font-size: 19px; }
+    .avatar-actions { display: flex; gap: 7px; }
+    #avatarInput { display: none; }
+
+    .toast { position: fixed; z-index: 40; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; color: var(--text); background: var(--glass-solid); border: 1px solid var(--line-strong); border-radius: 12px; padding: 10px 15px; box-shadow: var(--shadow); font-size: 11px; pointer-events: none; transition: .25s; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 760px) {
+      .app { display: block; padding: 0; }
+      .main { height: 100dvh; border-radius: 0; border: 0; }
+      .sidebar { position: fixed; z-index: 30; left: 10px; top: 10px; bottom: 10px; width: min(290px, calc(100% - 38px)); transform: translateX(calc(-100% - 20px)); transition: .28s cubic-bezier(.2,.8,.2,1); background: var(--glass-solid); }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-shade { position: fixed; z-index: 29; inset: 0; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: .25s; }
+      .sidebar-shade.show { opacity: 1; pointer-events: auto; }
+      .mobile-menu { display: grid; }
+      .topbar { height: 63px; padding: 0 12px; }
+      .connection { display: none; }
+      .model-endpoint { max-width: 130px; }
+      .chat-inner { width: calc(100% - 28px); padding-top: 16px; }
+      .empty { padding: 25px 0; }
+      .suggestions { grid-template-columns: 1fr; }
+      .suggestion { min-height: 75px; }
+      .suggestion .icon { margin-bottom: 7px; }
+      .suggestion:nth-child(3) { display: none; }
+      .composer-area { padding: 0 10px calc(10px + env(safe-area-inset-bottom)); }
+      .tool-pill span { display: none; }
+      .message.user .message-body { max-width: 92%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <div class="aurora"><div class="orb one"></div><div class="orb two"></div><div class="orb three"></div></div>
+  <div class="noise"></div>
+  <div class="sidebar-shade" id="sidebarShade"></div>
+
+  <div class="app">
+    <aside class="sidebar glass" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="M19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg></div>
+        <div><b>Luma AI</b><small>Personal intelligence</small></div>
+      </div>
+      <button class="new-chat" id="newChat"><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Percakapan baru</button>
+      <div class="history-label">Percakapan</div>
+      <div class="session-list" id="sessionList"></div>
+      <div class="profile-card">
+        <div class="avatar" id="sideAvatar"></div>
+        <div class="profile-info"><div class="profile-name" id="sideName"></div><div class="profile-plan">Ruang kerja pribadi</div></div>
+        <button class="icon-btn" id="openSettings" title="Pengaturan"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.6v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></svg></button>
+      </div>
+    </aside>
+
+    <main class="main glass">
+      <header class="topbar">
+        <button class="icon-btn mobile-menu" id="mobileMenu" aria-label="Buka menu"><svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <button class="model-button" id="modelButton">
+          <i class="model-dot"></i><div><div class="model-name" id="topModel"></div><div class="model-endpoint" id="topEndpoint"></div></div>
+          <svg class="icon" viewBox="0 0 24 24" style="width:14px"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+        <div class="top-spacer"></div>
+        <div class="connection"><i></i><span>Siap terhubung</span></div>
+        <button class="icon-btn" id="themeButton" title="Ganti tema"><svg class="icon" viewBox="0 0 24 24"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg></button>
+      </header>
+
+      <section class="chat" id="chat"><div class="chat-inner" id="chatInner"></div></section>
+
+      <footer class="composer-area">
+        <form class="composer" id="composer">
+          <textarea id="prompt" rows="1" placeholder="Tanyakan apa saja..." aria-label="Pesan"></textarea>
+          <div class="composer-row">
+            <button class="tool-pill" type="button" id="searchToggle"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Cari web</span></button>
+            <button class="tool-pill" type="button" id="effortToggle"><svg class="icon" viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M8.5 14.5A6 6 0 1 1 15.5 14.5c-.9.7-1.5 1.6-1.5 2.5h-4c0-.9-.6-1.8-1.5-2.5Z"/></svg><span id="effortLabel">Thinking: Medium</span></button>
+            <div class="composer-spacer"></div>
+            <button class="send" id="sendButton" type="submit" disabled aria-label="Kirim"><svg class="icon" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5"/></svg></button>
+          </div>
+        </form>
+        <div class="disclaimer">AI dapat membuat kesalahan. Periksa informasi penting.</div>
+      </footer>
+    </main>
+  </div>
+
+  <div class="scrim" id="scrim"></div>
+  <section class="modal" id="settings" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-head"><h2 id="settingsTitle">Pengaturan</h2><button class="icon-btn" id="closeSettings"><svg class="icon" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div class="section-title">Profil</div>
+      <div class="avatar-editor"><div class="avatar" id="editAvatar"></div><div><div class="avatar-actions"><label class="btn" for="avatarInput" style="display:grid;place-items:center">Pilih foto</label><button class="btn" id="removeAvatar" type="button">Hapus</button></div><input id="avatarInput" type="file" accept="image/*"><div class="field-help">JPG, PNG, atau WebP. Maksimal 2 MB.</div></div></div>
+      <div class="field"><label for="profileName">Nama tampilan</label><input class="input" id="profileName" maxlength="40" placeholder="Nama Anda"></div>
+      <div class="divider"></div>
+      <div class="section-title">Provider AI</div>
+      <div class="field"><label for="endpoint">Endpoint <span>OpenAI-compatible</span></label><input class="input" id="endpoint" placeholder="https://api.openai.com/v1"></div>
+      <div class="field"><label for="apiKey">API key <span>Disimpan lokal</span></label><div class="api-wrap"><input class="input" id="apiKey" type="password" autocomplete="off" placeholder="sk-..."><button class="icon-btn" id="showKey" type="button"><svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="2.5"/></svg></button></div></div>
+      <div class="field"><label for="model">Model</label><input class="input" id="model" placeholder="gpt-4o-mini"></div>
+      <div class="grid-two">
+        <div class="field"><label for="temperature">Temperature <span id="temperatureValue">0.7</span></label><input id="temperature" type="range" min="0" max="2" step="0.1" value="0.7" style="width:100%;accent-color:var(--accent)"></div>
+        <div class="field"><label for="effortSelect">Thinking effort</label><select class="select" id="effortSelect"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-title">Plugin pencarian internet</div>
+      <div class="toggle-row"><div class="toggle-copy"><b>Aktifkan pencarian Tavily</b><span>Tambahkan hasil web terbaru sebagai konteks AI.</span></div><button class="switch" id="webSwitch" type="button" aria-label="Aktifkan pencarian"></button></div>
+      <div class="field"><label for="tavilyKey">Tavily API key</label><div class="api-wrap"><input class="input" id="tavilyKey" type="password" autocomplete="off" placeholder="tvly-..."></div><div class="field-help">Dapatkan key di <a href="https://tavily.com" target="_blank" rel="noopener">tavily.com</a>. Pencarian hanya berjalan saat tombol Cari web aktif.</div></div>
+      <div class="divider"></div>
+      <div class="section-title">Data dan tampilan</div>
+      <div class="toggle-row"><div class="toggle-copy"><b>Tema terang</b><span>Gunakan tampilan liquid-glass terang.</span></div><button class="switch" id="lightSwitch" type="button" aria-label="Tema terang"></button></div>
+      <button class="btn" id="exportData" type="button">Ekspor percakapan</button>
+    </div>
+    <div class="modal-foot"><button class="btn" id="cancelSettings" type="button">Batal</button><button class="btn primary" id="saveSettings" type="button">Simpan perubahan</button></div>
+  </section>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "luma-ai-state-v1";
+    const defaults = {
+      profile: { name: "Pengguna Luma", avatar: "" },
+      config: { endpoint: "https://api.openai.com/v1", apiKey: "", model: "gpt-4o-mini", temperature: 0.7, effort: "medium", webEnabled: false, tavilyKey: "", light: false },
+      sessions: [{ id: crypto.randomUUID(), title: "Percakapan baru", createdAt: Date.now(), messages: [] }],
+      activeId: null,
+      searchActive: false
+    };
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!saved) return structuredClone(defaults);
+        return { ...structuredClone(defaults), ...saved, profile: { ...defaults.profile, ...saved.profile }, config: { ...defaults.config, ...saved.config } };
+      } catch { return structuredClone(defaults); }
+    }
+
+    let state = loadState();
+    if (!state.sessions?.length) state.sessions = [newSession()];
+    if (!state.activeId || !state.sessions.some(s => s.id === state.activeId)) state.activeId = state.sessions[0].id;
+    let controller = null;
+    let pendingAvatar = state.profile.avatar;
+    let toastTimer;
+
+    const $ = id => document.getElementById(id);
+    const els = {
+      sidebar: $("sidebar"), sidebarShade: $("sidebarShade"), sessionList: $("sessionList"), newChat: $("newChat"),
+      chat: $("chat"), chatInner: $("chatInner"), prompt: $("prompt"), composer: $("composer"), send: $("sendButton"),
+      settings: $("settings"), scrim: $("scrim"), searchToggle: $("searchToggle"), effortToggle: $("effortToggle")
+    };
+
+    function newSession() { return { id: crypto.randomUUID(), title: "Percakapan baru", createdAt: Date.now(), messages: [] }; }
+    function activeSession() { return state.sessions.find(s => s.id === state.activeId); }
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function initials(name) { return (name || "U").trim().split(/\s+/).slice(0, 2).map(x => x[0]).join("").toUpperCase(); }
+    function avatarMarkup(size = "side") { return state.profile.avatar ? `<img src="${state.profile.avatar}" alt="Foto profil">` : initials(state.profile.name); }
+    function escapeHtml(text = "") { return text.replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c])); }
+    function formatText(text = "") {
+      const safe = escapeHtml(text);
+      const blocks = safe.split(/```/);
+      return blocks.map((part, i) => i % 2 ? `<pre><code>${part.replace(/^\w+\n/, "")}</code></pre>` : part.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g,"<br>").replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>")}</p>`).join("")).join("");
+    }
+    function timeAgo(ts) {
+      const minutes = Math.floor((Date.now() - ts) / 60000);
+      if (minutes < 1) return "Baru saja";
+      if (minutes < 60) return `${minutes} menit lalu`;
+      if (minutes < 1440) return `${Math.floor(minutes / 60)} jam lalu`;
+      return new Date(ts).toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+    }
+    function showToast(message) { clearTimeout(toastTimer); $("toast").textContent = message; $("toast").classList.add("show"); toastTimer = setTimeout(() => $("toast").classList.remove("show"), 2400); }
+
+    function renderSidebar() {
+      els.sessionList.innerHTML = state.sessions.map(s => `<button class="session ${s.id === state.activeId ? "active" : ""}" data-id="${s.id}"><div class="session-copy"><div class="session-title">${escapeHtml(s.title)}</div><div class="session-time">${timeAgo(s.createdAt)}</div></div><span class="delete-session" data-delete="${s.id}" title="Hapus sesi"><svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg></span></button>`).join("");
+      const current = activeSession();
+      els.newChat.disabled = !current || current.messages.length === 0 || !!controller;
+      $("sideAvatar").innerHTML = avatarMarkup();
+      $("sideName").textContent = state.profile.name;
+    }
+
+    function emptyMarkup() {
+      const first = state.profile.name.trim().split(/\s+/)[0] || "teman";
+      return `<div class="empty"><div class="empty-orb"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="M19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></svg></div><h1>Selamat datang, <span>${escapeHtml(first)}</span></h1><p>Ruang untuk bertanya, menjelajah ide, dan menyelesaikan pekerjaan bersama AI pilihanmu.</p><div class="suggestions"><button class="suggestion" data-prompt="Bantu saya menyusun rencana produktif untuk minggu ini"><svg class="icon" viewBox="0 0 24 24"><path d="M8 2v3M16 2v3M3 9h18M5 4h14a2 2 0 0 1 2 2v14H3V6a2 2 0 0 1 2-2Z"/></svg><b>Susun rencana</b><span>Buat agenda yang fokus dan realistis</span></button><button class="suggestion" data-prompt="Jelaskan satu ide kompleks dengan bahasa yang sederhana"><svg class="icon" viewBox="0 0 24 24"><path d="M9 18h6M10 22h4M8.5 14.5A6 6 0 1 1 15.5 14.5c-.9.7-1.5 1.6-1.5 2.5h-4c0-.9-.6-1.8-1.5-2.5Z"/></svg><b>Pelajari sesuatu</b><span>Uraikan topik rumit secara sederhana</span></button><button class="suggestion" data-prompt="Berikan 10 ide kreatif untuk proyek baru yang bisa saya mulai"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19h16M6 16l9-9 3 3-9 9H6v-3Z"/></svg><b>Cari inspirasi</b><span>Temukan sudut pandang dan ide baru</span></button></div></div>`;
+    }
+
+    function messageMarkup(m, index) {
+      const isUser = m.role === "user";
+      const avatar = isUser ? avatarMarkup() : `<svg class="icon" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/></svg>`;
+      const searching = m.searchUsed ? `<div class="search-note">Hasil web disertakan</div>` : "";
+      const content = m.loading ? `<div class="thinking"><span>${m.searching ? "Mencari di internet" : "Sedang berpikir"}</span><span class="thinking-dots"><i></i><i></i><i></i></span></div>` : formatText(m.content);
+      return `<article class="message ${isUser ? "user" : "assistant"}"><div class="message-avatar ${isUser ? "" : "ai"}">${avatar}</div><div class="message-body"><div class="message-meta">${isUser ? escapeHtml(state.profile.name) : escapeHtml(state.config.model)}</div>${searching}<div class="message-content">${content}</div>${!m.loading ? `<div class="message-actions"><button class="mini-btn" data-copy="${index}">Salin</button></div>` : ""}</div></article>`;
+    }
+
+    function renderChat(scroll = false) {
+      const session = activeSession();
+      els.chatInner.innerHTML = session.messages.length ? `<div class="messages">${session.messages.map(messageMarkup).join("")}</div>` : emptyMarkup();
+      if (scroll) requestAnimationFrame(() => { els.chat.scrollTop = els.chat.scrollHeight; });
+    }
+
+    function renderConfig() {
+      $("topModel").textContent = state.config.model || "Pilih model";
+      $("topEndpoint").textContent = state.config.endpoint.replace(/^https?:\/\//, "") || "Endpoint belum diatur";
+      document.body.classList.toggle("light", state.config.light);
+      els.searchToggle.classList.toggle("active", state.searchActive && state.config.webEnabled);
+      els.searchToggle.title = state.config.webEnabled ? "Gunakan pencarian internet" : "Aktifkan plugin di Pengaturan";
+      $("effortLabel").textContent = `Thinking: ${state.config.effort[0].toUpperCase() + state.config.effort.slice(1)}`;
+      els.effortToggle.classList.toggle("active", state.config.effort !== "low");
+    }
+
+    function renderAll() { renderSidebar(); renderChat(); renderConfig(); }
+
+    function openSettings() {
+      pendingAvatar = state.profile.avatar;
+      $("profileName").value = state.profile.name;
+      $("endpoint").value = state.config.endpoint;
+      $("apiKey").value = state.config.apiKey;
+      $("model").value = state.config.model;
+      $("temperature").value = state.config.temperature;
+      $("temperatureValue").textContent = state.config.temperature;
+      $("effortSelect").value = state.config.effort;
+      $("tavilyKey").value = state.config.tavilyKey;
+      $("webSwitch").classList.toggle("on", state.config.webEnabled);
+      $("lightSwitch").classList.toggle("on", state.config.light);
+      updateEditAvatar();
+      els.scrim.classList.add("show"); els.settings.classList.add("show");
+    }
+    function closeSettings() { els.scrim.classList.remove("show"); els.settings.classList.remove("show"); }
+    function updateEditAvatar() { $("editAvatar").innerHTML = pendingAvatar ? `<img src="${pendingAvatar}" alt="Pratinjau foto">` : initials($("profileName").value || state.profile.name); }
+
+    function createChat() {
+      const current = activeSession();
+      if (!current.messages.length) return showToast("Kirim pesan dahulu sebelum membuat sesi baru.");
+      const session = newSession(); state.sessions.unshift(session); state.activeId = session.id; save(); renderAll(); els.prompt.focus();
+    }
+
+    function deleteChat(id) {
+      const session = state.sessions.find(s => s.id === id);
+      if (!session || !confirm(`Hapus percakapan "${session.title}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+      state.sessions = state.sessions.filter(s => s.id !== id);
+      if (!state.sessions.length) state.sessions.push(newSession());
+      if (state.activeId === id) state.activeId = state.sessions[0].id;
+      save(); renderAll();
+    }
+
+    async function searchWeb(query) {
+      if (!state.config.tavilyKey) throw new Error("Tavily API key belum diisi.");
+      const response = await fetch("https://api.tavily.com/search", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ api_key: state.config.tavilyKey, query, search_depth: "basic", max_results: 5, include_answer: true }), signal: controller.signal });
+      if (!response.ok) throw new Error(`Pencarian web gagal (${response.status}).`);
+      const data = await response.json();
+      return (data.results || []).map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.content}`).join("\n\n");
+    }
+
+    async function streamCompletion(messages, target) {
+      const endpoint = state.config.endpoint.replace(/\/$/, "") + "/chat/completions";
+      const payload = { model: state.config.model, messages, temperature: Number(state.config.temperature), stream: true };
+      if (state.config.effort) payload.reasoning_effort = state.config.effort;
+      const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", ...(state.config.apiKey ? { "Authorization": `Bearer ${state.config.apiKey}` } : {}) }, body: JSON.stringify(payload), signal: controller.signal });
+      if (!response.ok) {
+        let detail = ""; try { detail = (await response.json()).error?.message || ""; } catch {}
+        throw new Error(detail || `API merespons dengan status ${response.status}.`);
+      }
+      if (!response.body) throw new Error("Browser tidak mendukung respons streaming.");
+      const reader = response.body.getReader(); const decoder = new TextDecoder(); let buffer = "";
+      target.loading = false; target.content = ""; renderChat(true);
+      while (true) {
+        const { done, value } = await reader.read(); if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n"); buffer = lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith("data: ") || line.includes("[DONE]")) continue;
+          try { const json = JSON.parse(line.slice(6)); target.content += json.choices?.[0]?.delta?.content || ""; } catch {}
+        }
+        renderChat(true);
+      }
+    }
+
+    async function sendMessage(text) {
+      text = text.trim(); if (!text || controller) return;
+      if (!state.config.apiKey || !state.config.endpoint || !state.config.model) { openSettings(); return showToast("Lengkapi endpoint, API key, dan model."); }
+      const session = activeSession();
+      const userMessage = { role: "user", content: text, createdAt: Date.now() };
+      const aiMessage = { role: "assistant", content: "", loading: true, searching: state.searchActive && state.config.webEnabled, searchUsed: false, createdAt: Date.now() };
+      session.messages.push(userMessage, aiMessage);
+      if (session.messages.length === 2) session.title = text.length > 42 ? text.slice(0, 42) + "..." : text;
+      els.prompt.value = ""; resizePrompt(); controller = new AbortController(); setSending(true); renderSidebar(); renderChat(true); save();
+      try {
+        let apiMessages = session.messages.filter(m => !m.loading).map(m => ({ role: m.role, content: m.content }));
+        if (state.searchActive && state.config.webEnabled) {
+          const results = await searchWeb(text); aiMessage.searching = false; aiMessage.searchUsed = true;
+          apiMessages = [{ role: "system", content: `Gunakan hasil pencarian berikut untuk menjawab. Sertakan URL sumber yang relevan dan jangan mengarang fakta di luar hasil.\n\n${results}` }, ...apiMessages];
+        }
+        await streamCompletion(apiMessages, aiMessage);
+        if (!aiMessage.content) aiMessage.content = "Tidak ada respons yang diterima dari model.";
+      } catch (error) {
+        aiMessage.loading = false; aiMessage.searching = false;
+        aiMessage.content = error.name === "AbortError" ? (aiMessage.content || "Respons dihentikan.") : `Terjadi masalah: ${error.message}`;
+      } finally {
+        controller = null; setSending(false); save(); renderSidebar(); renderChat(true);
+      }
+    }
+
+    function setSending(active) {
+      els.send.classList.toggle("stop", active);
+      els.send.innerHTML = active ? `<svg class="icon" viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1"/></svg>` : `<svg class="icon" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7M12 19V5"/></svg>`;
+      els.send.disabled = !active && !els.prompt.value.trim();
+    }
+    function resizePrompt() { els.prompt.style.height = "auto"; els.prompt.style.height = Math.min(els.prompt.scrollHeight, 150) + "px"; els.send.disabled = !els.prompt.value.trim() && !controller; }
+
+    els.composer.addEventListener("submit", e => { e.preventDefault(); if (controller) controller.abort(); else sendMessage(els.prompt.value); });
+    els.prompt.addEventListener("input", resizePrompt);
+    els.prompt.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); els.composer.requestSubmit(); } });
+    els.newChat.addEventListener("click", createChat);
+    $("openSettings").addEventListener("click", openSettings); $("modelButton").addEventListener("click", openSettings);
+    $("closeSettings").addEventListener("click", closeSettings); $("cancelSettings").addEventListener("click", closeSettings); els.scrim.addEventListener("click", closeSettings);
+    $("themeButton").addEventListener("click", () => { state.config.light = !state.config.light; save(); renderConfig(); });
+    $("mobileMenu").addEventListener("click", () => { els.sidebar.classList.add("open"); els.sidebarShade.classList.add("show"); });
+    els.sidebarShade.addEventListener("click", () => { els.sidebar.classList.remove("open"); els.sidebarShade.classList.remove("show"); });
+    els.sessionList.addEventListener("click", e => {
+      const del = e.target.closest("[data-delete]"); if (del) return deleteChat(del.dataset.delete);
+      const row = e.target.closest("[data-id]"); if (row) { state.activeId = row.dataset.id; save(); renderSidebar(); renderChat(); els.sidebar.classList.remove("open"); els.sidebarShade.classList.remove("show"); }
+    });
+    els.chatInner.addEventListener("click", e => {
+      const suggestion = e.target.closest("[data-prompt]"); if (suggestion) { els.prompt.value = suggestion.dataset.prompt; resizePrompt(); els.prompt.focus(); }
+      const copy = e.target.closest("[data-copy]"); if (copy) navigator.clipboard.writeText(activeSession().messages[Number(copy.dataset.copy)].content).then(() => showToast("Pesan disalin."));
+    });
+    els.searchToggle.addEventListener("click", () => { if (!state.config.webEnabled) { openSettings(); return showToast("Aktifkan plugin pencarian terlebih dahulu."); } state.searchActive = !state.searchActive; save(); renderConfig(); });
+    els.effortToggle.addEventListener("click", () => { const options = ["low", "medium", "high"]; state.config.effort = options[(options.indexOf(state.config.effort) + 1) % options.length]; save(); renderConfig(); });
+    $("temperature").addEventListener("input", e => $("temperatureValue").textContent = e.target.value);
+    $("profileName").addEventListener("input", updateEditAvatar);
+    $("showKey").addEventListener("click", () => $("apiKey").type = $("apiKey").type === "password" ? "text" : "password");
+    $("webSwitch").addEventListener("click", e => e.currentTarget.classList.toggle("on"));
+    $("lightSwitch").addEventListener("click", e => e.currentTarget.classList.toggle("on"));
+    $("removeAvatar").addEventListener("click", () => { pendingAvatar = ""; updateEditAvatar(); });
+    $("avatarInput").addEventListener("change", e => {
+      const file = e.target.files[0]; if (!file) return;
+      if (file.size > 2 * 1024 * 1024) return showToast("Ukuran foto maksimal 2 MB.");
+      const reader = new FileReader(); reader.onload = () => { pendingAvatar = reader.result; updateEditAvatar(); }; reader.readAsDataURL(file);
+    });
+    $("saveSettings").addEventListener("click", () => {
+      const name = $("profileName").value.trim(); const endpoint = $("endpoint").value.trim(); const model = $("model").value.trim();
+      if (!name || !endpoint || !model) return showToast("Nama, endpoint, dan model wajib diisi.");
+      state.profile = { name, avatar: pendingAvatar };
+      state.config = { ...state.config, endpoint, apiKey: $("apiKey").value.trim(), model, temperature: Number($("temperature").value), effort: $("effortSelect").value, tavilyKey: $("tavilyKey").value.trim(), webEnabled: $("webSwitch").classList.contains("on"), light: $("lightSwitch").classList.contains("on") };
+      if (!state.config.webEnabled) state.searchActive = false;
+      save(); closeSettings(); renderAll(); showToast("Pengaturan tersimpan.");
+    });
+    $("exportData").addEventListener("click", () => {
+      const data = JSON.stringify({ profile: { name: state.profile.name }, sessions: state.sessions }, null, 2);
+      const url = URL.createObjectURL(new Blob([data], { type: "application/json" })); const a = document.createElement("a"); a.href = url; a.download = `luma-ai-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(url);
+    });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") { closeSettings(); els.sidebar.classList.remove("open"); els.sidebarShade.classList.remove("show"); } });
+
+    renderAll();
+  </script>
+</body>
+</html>
