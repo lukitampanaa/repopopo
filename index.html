@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LogMath — Dunia Logaritma</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #1a1a2e;
+      --bg-card-hover: #1f1f35;
+      --accent: #6c63ff;
+      --accent-light: #8b83ff;
+      --accent-glow: rgba(108, 99, 255, 0.3);
+      --text-primary: #f0f0f5;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --border: #2a2a3e;
+      --success: #4ade80;
+      --error: #f87171;
+      --warning: #fbbf24;
+      --gradient-1: linear-gradient(135deg, #6c63ff 0%, #e040fb 100%);
+      --gradient-2: linear-gradient(135deg, #6c63ff 0%, #00bcd4 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+      50% { box-shadow: 0 0 40px var(--accent-glow), 0 0 60px rgba(108, 99, 255, 0.15); }
+    }
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .animate-fade-in-up { animation: fadeInUp 0.6s ease forwards; }
+    .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+    .animate-float { animation: float 3s ease-in-out infinite; }
+    .animate-slide-in { animation: slideInLeft 0.5s ease forwards; }
+    .animate-scale-in { animation: scaleIn 0.4s ease forwards; }
+
+    .delay-1 { animation-delay: 0.1s; opacity: 0; }
+    .delay-2 { animation-delay: 0.2s; opacity: 0; }
+    .delay-3 { animation-delay: 0.3s; opacity: 0; }
+    .delay-4 { animation-delay: 0.4s; opacity: 0; }
+    .delay-5 { animation-delay: 0.5s; opacity: 0; }
+
+    /* Glass effect */
+    .glass {
+      background: rgba(26, 26, 46, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(108, 99, 255, 0.1);
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .gradient-text-2 {
+      background: var(--gradient-2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Card styles */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(108, 99, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Button styles */
+    .btn-primary {
+      background: var(--gradient-1);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 28px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: rgba(108, 99, 255, 0.1);
+    }
+
+    .btn-sm {
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      border-radius: 10px;
+    }
+
+    /* Nav styles */
+    .nav-link {
+      position: relative;
+      color: var(--text-secondary);
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.3s ease;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 10px;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-primary);
+    }
+    .nav-link.active {
+      background: rgba(108, 99, 255, 0.15);
+      color: var(--accent-light);
+    }
+
+    /* Formula card */
+    .formula-block {
+      background: rgba(108, 99, 255, 0.08);
+      border: 1px solid rgba(108, 99, 255, 0.2);
+      border-radius: 12px;
+      padding: 20px 24px;
+      font-size: 1.1rem;
+      text-align: center;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+    .formula-block:hover {
+      background: rgba(108, 99, 255, 0.12);
+      border-color: rgba(108, 99, 255, 0.4);
+    }
+
+    /* Quiz styles */
+    .quiz-option {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+    .quiz-option:hover {
+      border-color: var(--accent);
+      background: rgba(108, 99, 255, 0.08);
+    }
+    .quiz-option.selected {
+      border-color: var(--accent);
+      background: rgba(108, 99, 255, 0.15);
+    }
+    .quiz-option.correct {
+      border-color: var(--success);
+      background: rgba(74, 222, 128, 0.1);
+    }
+    .quiz-option.incorrect {
+      border-color: var(--error);
+      background: rgba(248, 113, 113, 0.1);
+    }
+
+    /* Difficulty badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-easy { background: rgba(74, 222, 128, 0.15); color: var(--success); }
+    .badge-medium { background: rgba(251, 191, 36, 0.15); color: var(--warning); }
+    .badge-hard { background: rgba(248, 113, 113, 0.15); color: var(--error); }
+
+    /* Progress bar */
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--gradient-1);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+
+    /* Particle background */
+    .particles {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 4px; height: 4px;
+      background: var(--accent);
+      border-radius: 50%;
+      opacity: 0.15;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    /* Mobile menu */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(10, 10, 15, 0.95);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu .nav-link {
+      font-size: 1.3rem;
+      padding: 14px 32px;
+    }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    /* Hamburger */
+    .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .hamburger span {
+      width: 24px; height: 2px;
+      background: var(--text-primary);
+      transition: all 0.3s ease;
+      border-radius: 2px;
+    }
+
+    /* Tab */
+    .tab-btn {
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+    }
+    .tab-btn:hover { color: var(--text-primary); background: rgba(108, 99, 255, 0.08); }
+    .tab-btn.active {
+      background: rgba(108, 99, 255, 0.15);
+      color: var(--accent-light);
+      border-color: rgba(108, 99, 255, 0.3);
+    }
+
+    /* Accordion */
+    .accordion-header {
+      cursor: pointer;
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.3s ease;
+      border-radius: 12px;
+    }
+    .accordion-header:hover { background: rgba(108, 99, 255, 0.05); }
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+      padding: 0 24px;
+    }
+    .accordion-content.open {
+      max-height: 2000px;
+      padding: 0 24px 20px;
+    }
+    .accordion-arrow {
+      transition: transform 0.3s ease;
+      color: var(--text-muted);
+    }
+    .accordion-arrow.open { transform: rotate(180deg); }
+
+    /* Score circle */
+    .score-circle {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+      position: relative;
+    }
+    .score-circle::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: var(--gradient-1);
+      z-index: -1;
+    }
+    .score-circle::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--bg-card);
+      z-index: -1;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+    }
+    .tooltip-text {
+      visibility: hidden;
+      opacity: 0;
+      position: absolute;
+      bottom: 120%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+    .tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hamburger { display: flex; }
+      .desktop-nav { display: none !important; }
+      .hero-title { font-size: 2.2rem !important; }
+      .hero-subtitle { font-size: 1rem !important; }
+    }
+    @media (max-width: 480px) {
+      .hero-title { font-size: 1.8rem !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Particles -->
+<div class="particles" id="particles"></div>
+
+<!-- Navigation -->
+<nav class="glass fixed top-0 left-0 right-0 z-50" style="border-bottom: 1px solid var(--border);">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; height: 64px;">
+      <!-- Logo -->
+      <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="navigateTo('home')">
+        <div style="width: 36px; height: 36px; background: var(--gradient-1); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;">L</div>
+        <span style="font-weight: 700; font-size: 1.15rem; letter-spacing: -0.5px;">Log<span class="gradient-text">Math</span></span>
+      </div>
+
+      <!-- Desktop Nav -->
+      <div class="desktop-nav" style="display: flex; align-items: center; gap: 4px;">
+        <div class="nav-link active" onclick="navigateTo('home')" data-nav="home">
+          <span>🏠</span> Beranda
+        </div>
+        <div class="nav-link" onclick="navigateTo('rumus')" data-nav="rumus">
+          <span>📐</span> Rumus
+        </div>
+        <div class="nav-link" onclick="navigateTo('latihan')" data-nav="latihan">
+          <span>✏️</span> Latihan Soal
+        </div>
+        <div class="nav-link" onclick="navigateTo('kreator')" data-nav="kreator">
+          <span>👤</span> Kreator
+        </div>
+      </div>
+
+      <!-- Hamburger -->
+      <div class="hamburger" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <div style="position: absolute; top: 20px; right: 24px; font-size: 1.8rem; cursor: pointer; color: var(--text-secondary);" onclick="toggleMobileMenu()">✕</div>
+  <div class="nav-link active" onclick="navigateTo('home'); toggleMobileMenu();" data-nav="home" style="font-size:1.3rem;">🏠 Beranda</div>
+  <div class="nav-link" onclick="navigateTo('rumus'); toggleMobileMenu();" data-nav="rumus" style="font-size:1.3rem;">📐 Rumus</div>
+  <div class="nav-link" onclick="navigateTo('latihan'); toggleMobileMenu();" data-nav="latihan" style="font-size:1.3rem;">✏️ Latihan Soal</div>
+  <div class="nav-link" onclick="navigateTo('kreator'); toggleMobileMenu();" data-nav="kreator" style="font-size:1.3rem;">👤 Kreator</div>
+</div>
+
+<!-- ==================== HOME ==================== -->
+<section class="section active" id="section-home">
+  <!-- Hero -->
+  <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 80px 24px 40px; position: relative;">
+    <!-- Glow orbs -->
+    <div style="position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%); top: 10%; left: -100px; border-radius: 50%;"></div>
+    <div style="position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(224,64,251,0.1) 0%, transparent 70%); bottom: 10%; right: -50px; border-radius: 50%;"></div>
+
+    <div style="max-width: 800px; text-align: center; position: relative; z-index: 1;">
+      <div class="animate-fade-in-up" style="margin-bottom: 20px;">
+        <span class="badge" style="background: rgba(108,99,255,0.15); color: var(--accent-light); font-size: 0.8rem; padding: 6px 16px;">📚 Website Pembelajaran Matematika</span>
+      </div>
+
+      <h1 class="hero-title animate-fade-in-up delay-1" style="font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1.5px;">
+        Pelajari <span class="gradient-text">Logaritma</span><br>dengan Mudah & Interaktif
+      </h1>
+
+      <p class="hero-subtitle animate-fade-in-up delay-2" style="font-size: 1.15rem; color: var(--text-secondary); max-width: 560px; margin: 0 auto 36px; line-height: 1.7;">
+        Kuasai konsep logaritma dari dasar hingga mahir. Pelajari rumus, sifat-sifat, dan uji pemahamanmu dengan latihan soal interaktif.
+      </p>
+
+      <div class="animate-fade-in-up delay-3" style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+        <button class="btn-primary" onclick="navigateTo('rumus')" style="font-size: 1rem; padding: 14px 32px;">
+          📐 Pelajari Rumus
+        </button>
+        <button class="btn-secondary" onclick="navigateTo('latihan')" style="font-size: 1rem; padding: 14px 32px;">
+          ✏️ Mulai Latihan
+        </button>
+      </div>
+
+      <!-- Stats -->
+      <div class="animate-fade-in-up delay-4" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 60px; max-width: 500px; margin-left: auto; margin-right: auto;">
+        <div class="card" style="padding: 20px; text-align: center;">
+          <div style="font-size: 1.8rem; font-weight: 800;" class="gradient-text">12+</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Rumus & Sifat</div>
+        </div>
+        <div class="card" style="padding: 20px; text-align: center;">
+          <div style="font-size: 1.8rem; font-weight: 800;" class="gradient-text">30+</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Soal Latihan</div>
+        </div>
+        <div class="card" style="padding: 20px; text-align: center;">
+          <div style="font-size: 1.8rem; font-weight: 800;" class="gradient-text">3</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Level Kesulitan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div style="max-width: 1000px; margin: 0 auto; padding: 0 24px 80px;">
+    <div style="text-align: center; margin-bottom: 48px;">
+      <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 12px;">Fitur <span class="gradient-text">Unggulan</span></h2>
+      <p style="color: var(--text-secondary); max-width: 480px; margin: 0 auto;">Dirancang untuk memudahkan proses belajar logaritma.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+      <div class="card" style="padding: 28px;">
+        <div style="width: 48px; height: 48px; background: rgba(108,99,255,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px;">📖</div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Rumus Lengkap</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Kumpulan lengkap rumus dan sifat-sifat logaritma dengan penjelasan yang mudah dipahami.</p>
+      </div>
+      <div class="card" style="padding: 28px;">
+        <div style="width: 48px; height: 48px; background: rgba(74,222,128,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px;">🧩</div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Latihan Interaktif</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Uji pemahamanmu dengan soal-soal dari tingkat Easy hingga Hard dengan feedback langsung.</p>
+      </div>
+      <div class="card" style="padding: 28px;">
+        <div style="width: 48px; height: 48px; background: rgba(251,191,36,0.15); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px;">📱</div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Responsive Design</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">Tampilan optimal di semua perangkat — desktop, tablet, maupun smartphone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== RUMUS ==================== -->
+<section class="section" id="section-rumus">
+  <div style="max-width: 900px; margin: 0 auto; padding: 100px 24px 60px;">
+    <div class="animate-fade-in-up" style="text-align: center; margin-bottom: 48px;">
+      <span class="badge" style="background: rgba(108,99,255,0.15); color: var(--accent-light); margin-bottom: 12px;">📐 RUMUS</span>
+      <h1 style="font-size: 2.5rem; font-weight: 900; margin-top: 12px; letter-spacing: -1px;">Rumus & Sifat <span class="gradient-text">Logaritma</span></h1>
+      <p style="color: var(--text-secondary); margin-top: 12px; max-width: 500px; margin-left: auto; margin-right: auto;">Pelajari semua rumus dasar dan sifat-sifat logaritma secara lengkap.</p>
+    </div>
+
+    <!-- Definisi Dasar -->
+    <div class="card animate-fade-in-up delay-1" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(108,99,255,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">📌</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Definisi Logaritma</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">Konsep dasar logaritma</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.8; margin-bottom: 16px;">
+          Logaritma adalah operasi kebalikan dari perpangkatan (eksponen). Jika <strong style="color: var(--text-primary);">a<sup>b</sup> = c</strong>, maka:
+        </p>
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a</sup>log c = b &nbsp;&nbsp;⟺&nbsp;&nbsp; a<sup>b</sup> = c
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">
+          Dimana: <strong style="color: var(--accent-light);">a</strong> = basis (a > 0, a ≠ 1), <strong style="color: var(--accent-light);">c</strong> = numerus (c > 0), <strong style="color: var(--accent-light);">b</strong> = hasil logaritma.
+        </p>
+        <div style="margin-top: 16px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> ²log 8 = 3, karena 2³ = 8</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logaritma Umum & Natural -->
+    <div class="card animate-fade-in-up delay-2" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(0,188,212,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">🔢</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Logaritma Umum & Natural</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">log dan ln</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div style="display: grid; gap: 12px;">
+          <div class="formula-block">
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">Logaritma Umum (Basis 10)</div>
+            log x = <sup>10</sup>log x
+          </div>
+          <div class="formula-block">
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">Logaritma Natural (Basis e ≈ 2.718)</div>
+            ln x = <sup>e</sup>log x
+          </div>
+        </div>
+        <div style="margin-top: 16px; padding: 14px 18px; background: rgba(108,99,255,0.08); border-radius: 10px; border-left: 3px solid var(--accent);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--accent-light);">Info:</strong> log tanpa basis berarti basis 10. ln berarti basis e (bilangan Euler).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 1: Logaritma 1 -->
+    <div class="card animate-fade-in-up delay-2" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(251,191,36,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">1️⃣</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 1: Logaritma dari 1</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><sup>a</sup>log 1 = 0</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a</sup>log 1 = 0 &nbsp;&nbsp;(untuk semua a > 0, a ≠ 1)
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Karena bilangan apapun dipangkatkan 0 hasilnya 1: a⁰ = 1</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> ⁵log 1 = 0, ¹⁰log 1 = 0</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 2: Log basis = numerus -->
+    <div class="card animate-fade-in-up delay-3" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(108,99,255,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">2️⃣</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 2: Logaritma Basis Sendiri</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><sup>a</sup>log a = 1</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a</sup>log a = 1
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Karena a¹ = a, maka logaritma basis a dari a selalu 1.</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> ³log 3 = 1, ⁷log 7 = 1</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 3: Perkalian -->
+    <div class="card" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(74,222,128,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">3️⃣</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 3: Logaritma Perkalian</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><sup>a</sup>log (b·c) = <sup>a</sup>log b + <sup>a</sup>log c</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a</sup>log (b × c) = <sup>a</sup>log b + <sup>a</sup>log c
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Logaritma dari perkalian sama dengan jumlah logaritma masing-masing bilangan.</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> ²log 12 = ²log(4×3) = ²log 4 + ²log 3 = 2 + ²log 3</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 4: Pembagian -->
+    <div class="card" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(248,113,113,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">4️⃣</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 4: Logaritma Pembagian</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><sup>a</sup>log (b/c) = <sup>a</sup>log b − <sup>a</sup>log c</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a</sup>log (b / c) = <sup>a</sup>log b − <sup>a</sup>log c
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Logaritma dari pembagian sama dengan selisih logaritma pembilang dan penyebut.</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> ²log(8/2) = ²log 8 − ²log 2 = 3 − 1 = 2</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 5: Perpangkatan -->
+    <div class="card" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(224,64,251,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">5️⃣</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 5: Logaritma Perpangkatan</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><sup>a</sup>log b<sup>n</sup> = n · <sup>a</sup>log b</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a</sup>log b<sup>n</sup> = n × <sup>a</sup>log b
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Pangkat pada numerus dapat dipindahkan menjadi koefisien di depan logaritma.</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> ²log 8 = ²log 2³ = 3 × ²log 2 = 3 × 1 = 3</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 6: Pangkat pada Basis -->
+    <div class="card" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(0,188,212,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">6️⃣</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 6: Pangkat pada Basis</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><sup>a<sup>m</sup></sup>log b<sup>n</sup> = (n/m) · <sup>a</sup>log b</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a<sup>m</sup></sup>log b<sup>n</sup> = (n/m) × <sup>a</sup>log b
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Pangkat pada basis dan numerus bisa dikeluarkan sebagai pecahan pengali.</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> <sup>4</sup>log 8 = <sup>2²</sup>log 2³ = (3/2) × ²log 2 = 3/2</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 7: Perubahan Basis -->
+    <div class="card" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(251,191,36,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">7️⃣</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 7: Perubahan Basis</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><sup>a</sup>log b = <sup>c</sup>log b / <sup>c</sup>log a</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a</sup>log b = <sup>c</sup>log b / <sup>c</sup>log a
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Logaritma dengan basis tertentu dapat diubah ke basis lain menggunakan rumus ini.</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> ³log 5 = log 5 / log 3 (mengubah ke basis 10)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 8: Rantai Logaritma -->
+    <div class="card" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(108,99,255,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">8️⃣</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 8: Rantai Logaritma</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><sup>a</sup>log b × <sup>b</sup>log c = <sup>a</sup>log c</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a</sup>log b × <sup>b</sup>log c = <sup>a</sup>log c
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Perkalian logaritma berantai: basis log kedua = numerus log pertama, hasilnya bisa disederhanakan.</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> ²log 3 × ³log 8 = ²log 8 = 3</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 9: Invers -->
+    <div class="card" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(74,222,128,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">9️⃣</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 9: Invers Logaritma</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;"><sup>a</sup>log b = 1 / <sup>b</sup>log a</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          <sup>a</sup>log b = 1 / <sup>b</sup>log a
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Logaritma dengan basis a dari b adalah kebalikan dari logaritma basis b dari a.</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> ²log 5 = 1 / ⁵log 2</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sifat 10: Antilogaritma -->
+    <div class="card" style="padding: 0; margin-bottom: 16px; overflow: hidden;">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 40px; height: 40px; background: rgba(248,113,113,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">🔟</div>
+          <div>
+            <h3 style="font-weight: 700; font-size: 1.05rem;">Sifat 10: Antilogaritma (Eksponen)</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 2px;">a<sup><sup>a</sup>log b</sup> = b</p>
+          </div>
+        </div>
+        <svg class="accordion-arrow" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+      </div>
+      <div class="accordion-content">
+        <div class="formula-block" style="margin-bottom: 16px;">
+          a<sup><sup>a</sup>log b</sup> = b
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">Jika basis dipangkatkan dengan logaritmanya, hasilnya adalah numerus itu sendiri.</p>
+        <div style="margin-top: 12px; padding: 14px 18px; background: rgba(74,222,128,0.08); border-radius: 10px; border-left: 3px solid var(--success);">
+          <p style="font-size: 0.85rem; color: var(--text-secondary);"><strong style="color: var(--success);">Contoh:</strong> 2<sup>²log 8</sup> = 2³ = 8</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ringkasan Tabel -->
+    <div class="card" style="padding: 28px; margin-top: 32px;">
+      <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 20px; text-align: center;">📋 Ringkasan Semua Sifat Logaritma</h3>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--border);">
+              <th style="text-align: left; padding: 12px 16px; color: var(--accent-light); font-weight: 600;">No</th>
+              <th style="text-align: left; padding: 12px 16px; color: var(--accent-light); font-weight: 600;">Sifat</th>
+              <th style="text-align: left; padding: 12px 16px; color: var(--accent-light); font-weight: 600;">Rumus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid rgba(42,42,62,0.5);"><td style="padding: 10px 16px; color: var(--text-muted);">1</td><td style="padding: 10px 16px;">Log dari 1</td><td style="padding: 10px 16px; color: var(--accent-light);"><sup>a</sup>log 1 = 0</td></tr>
+            <tr style="border-bottom: 1px solid rgba(42,42,62,0.5);"><td style="padding: 10px 16px; color: var(--text-muted);">2</td><td style="padding: 10px 16px;">Log basis sendiri</td><td style="padding: 10px 16px; color: var(--accent-light);"><sup>a</sup>log a = 1</td></tr>
+            <tr style="border-bottom: 1px solid rgba(42,42,62,0.5);"><td style="padding: 10px 16px; color: var(--text-muted);">3</td><td style="padding: 10px 16px;">Perkalian</td><td style="padding: 10px 16px; color: var(--accent-light);"><sup>a</sup>log(b×c) = <sup>a</sup>log b + <sup>a</sup>log c</td></tr>
+            <tr style="border-bottom: 1px solid rgba(42,42,62,0.5);"><td style="padding: 10px 16px; color: var(--text-muted);">4</td><td style="padding: 10px 16px;">Pembagian</td><td style="padding: 10px 16px; color: var(--accent-light);"><sup>a</sup>log(b/c) = <sup>a</sup>log b − <sup>a</sup>log c</td></tr>
+            <tr style="border-bottom: 1px solid rgba(42,42,62,0.5);"><td style="padding: 10px 16px; color: var(--text-muted);">5</td><td style="padding: 10px 16px;">Perpangkatan</td><td style="padding: 10px 16px; color: var(--accent-light);"><sup>a</sup>log b<sup>n</sup> = n·<sup>a</sup>log b</td></tr>
+            <tr style="border-bottom: 1px solid rgba(42,42,62,0.5);"><td style="padding: 10px 16px; color: var(--text-muted);">6</td><td style="padding: 10px 16px;">Pangkat basis</td><td style="padding: 10px 16px; color: var(--accent-light);"><sup>a<sup>m</sup></sup>log b<sup>n</sup> = (n/m)·<sup>a</sup>log b</td></tr>
+            <tr style="border-bottom: 1px solid rgba(42,42,62,0.5);"><td style="padding: 10px 16px; color: var(--text-muted);">7</td><td style="padding: 10px 16px;">Ubah basis</td><td style="padding: 10px 16px; color: var(--accent-light);"><sup>a</sup>log b = <sup>c</sup>log b / <sup>c</sup>log a</td></tr>
+            <tr style="border-bottom: 1px solid rgba(42,42,62,0.5);"><td style="padding: 10px 16px; color: var(--text-muted);">8</td><td style="padding: 10px 16px;">Rantai</td><td style="padding: 10px 16px; color: var(--accent-light);"><sup>a</sup>log b × <sup>b</sup>log c = <sup>a</sup>log c</td></tr>
+            <tr style="border-bottom: 1px solid rgba(42,42,62,0.5);"><td style="padding: 10px 16px; color: var(--text-muted);">9</td><td style="padding: 10px 16px;">Invers</td><td style="padding: 10px 16px; color: var(--accent-light);"><sup>a</sup>log b = 1 / <sup>b</sup>log a</td></tr>
+            <tr><td style="padding: 10px 16px; color: var(--text-muted);">10</td><td style="padding: 10px 16px;">Antilogaritma</td><td style="padding: 10px 16px; color: var(--accent-light);">a<sup><sup>a</sup>log b</sup> = b</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== LATIHAN SOAL ==================== -->
+<section class="section" id="section-latihan">
+  <div style="max-width: 800px; margin: 0 auto; padding: 100px 24px 60px;">
+    <div class="animate-fade-in-up" style="text-align: center; margin-bottom: 40px;">
+      <span class="badge" style="background: rgba(108,99,255,0.15); color: var(--accent-light); margin-bottom: 12px;">✏️ LATIHAN</span>
+      <h1 style="font-size: 2.5rem; font-weight: 900; margin-top: 12px; letter-spacing: -1px;">Latihan <span class="gradient-text">Soal</span></h1>
+      <p style="color: var(--text-secondary); margin-top: 12px;">Pilih tingkat kesulitan dan uji pemahamanmu!</p>
+    </div>
+
+    <!-- Difficulty Selection -->
+    <div id="difficulty-select" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 40px;">
+      <div class="card" style="padding: 28px; cursor: pointer; text-align: center;" onclick="startQuiz('easy')">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">🟢</div>
+        <h3 style="font-weight: 700; font-size: 1.15rem; margin-bottom: 6px;">Easy</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem;">Soal dasar logaritma</p>
+        <span class="badge badge-easy" style="margin-top: 12px;">10 Soal</span>
+      </div>
+      <div class="card" style="padding: 28px; cursor: pointer; text-align: center;" onclick="startQuiz('medium')">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">🟡</div>
+        <h3 style="font-weight: 700; font-size: 1.15rem; margin-bottom: 6px;">Medium</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem;">Penerapan sifat-sifat</p>
+        <span class="badge badge-medium" style="margin-top: 12px;">10 Soal</span>
+      </div>
+      <div class="card" style="padding: 28px; cursor: pointer; text-align: center;" onclick="startQuiz('hard')">
+        <div style="font-size: 2.5rem; margin-bottom: 12px;">🔴</div>
+        <h3 style="font-weight: 700; font-size: 1.15rem; margin-bottom: 6px;">Hard</h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem;">Soal tingkat lanjut</p>
+        <span class="badge badge-hard" style="margin-top: 12px;">10 Soal</span>
+      </div>
+    </div>
+
+    <!-- Quiz Area -->
+    <div id="quiz-area" style="display: none;">
+      <!-- Progress -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span id="quiz-badge" class="badge badge-easy">EASY</span>
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Soal <span id="q-current">1</span> / <span id="q-total">10</span></span>
+        </div>
+        <button class="btn-secondary btn-sm" onclick="resetQuiz()">✕ Keluar</button>
+      </div>
+      <div class="progress-bar" style="margin-bottom: 28px;">
+        <div class="progress-fill" id="quiz-progress" style="width: 10%;"></div>
+      </div>
+
+      <!-- Question Card -->
+      <div class="card" style="padding: 32px;" id="question-card">
+        <h3 id="question-text" style="font-size: 1.1rem; font-weight: 600; line-height: 1.7; margin-bottom: 24px;"></h3>
+        <div id="options-container" style="display: grid; gap: 12px;"></div>
+        <div id="feedback-area" style="display: none; margin-top: 20px; padding: 16px 20px; border-radius: 12px;">
+          <p id="feedback-text" style="font-size: 0.9rem; font-weight: 500;"></p>
+          <p id="feedback-explanation" style="font-size: 0.85rem; margin-top: 8px; color: var(--text-secondary);"></p>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
+          <button class="btn-primary" id="next-btn" onclick="nextQuestion()" style="display: none;">
+            Soal Berikutnya →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Area -->
+    <div id="result-area" style="display: none;">
+      <div class="card" style="padding: 40px; text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 16px;">🎉</div>
+        <h2 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 8px;">Kuis Selesai!</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 28px;">Berikut adalah hasil latihanmu:</p>
+
+        <div style="display: flex; justify-content: center; margin-bottom: 28px;">
+          <div class="score-circle" id="score-display">0</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 400px; margin: 0 auto 28px;">
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--success);" id="correct-count">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Benar</div>
+          </div>
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--error);" id="wrong-count">0</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Salah</div>
+          </div>
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent-light);" id="score-percent">0%</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Skor</div>
+          </div>
+        </div>
+
+        <p id="score-message" style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 28px;"></p>
+
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn-primary" onclick="resetQuiz()">🔄 Coba Lagi</button>
+          <button class="btn-secondary" onclick="navigateTo('rumus')">📐 Belajar Rumus</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== KREATOR ==================== -->
+<section class="section" id="section-kreator">
+  <div style="max-width: 700px; margin: 0 auto; padding: 100px 24px 60px;">
+    <div style="text-align: center; margin-bottom: 48px;">
+      <span class="badge" style="background: rgba(108,99,255,0.15); color: var(--accent-light); margin-bottom: 12px;">👤 KREATOR</span>
+      <h1 style="font-size: 2.5rem; font-weight: 900; margin-top: 12px; letter-spacing: -1px;">Tentang <span class="gradient-text">Kreator</span></h1>
+      <p style="color: var(--text-secondary); margin-top: 12px;">Mengenal pembuat website ini.</p>
+    </div>
+
+    <div class="card animate-scale-in" style="padding: 0; overflow: hidden;">
+      <!-- Header with gradient -->
+      <div style="height: 140px; background: var(--gradient-1); position: relative;">
+        <div style="position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%);">
+          <div style="width: 90px; height: 90px; border-radius: 50%; background: var(--bg-card); border: 4px solid var(--bg-primary); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">
+            👨‍💻
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 60px 32px 36px; text-align: center;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 4px;">LukI Pratama</h2>
+        <p style="color: var(--accent-light); font-size: 0.9rem; font-weight: 500; margin-bottom: 24px;">Pelajar & Web Developer</p>
+
+        <div style="display: grid; gap: 14px; max-width: 360px; margin: 0 auto;">
+          <div style="display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: rgba(108,99,255,0.08); border-radius: 12px; border: 1px solid rgba(108,99,255,0.15);">
+            <div style="width: 40px; height: 40px; background: rgba(108,99,255,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">👤</div>
+            <div style="text-align: left;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Nama</div>
+              <div style="font-weight: 600; font-size: 0.95rem;">LukI Pratama</div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: rgba(74,222,128,0.08); border-radius: 12px; border: 1px solid rgba(74,222,128,0.15);">
+            <div style="width: 40px; height: 40px; background: rgba(74,222,128,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">🏫</div>
+            <div style="text-align: left;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Kelas</div>
+              <div style="font-weight: 600; font-size: 0.95rem;">XE-6</div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 14px; padding: 16px 20px; background: rgba(251,191,36,0.08); border-radius: 12px; border: 1px solid rgba(251,191,36,0.15);">
+            <div style="width: 40px; height: 40px; background: rgba(251,191,36,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">🎓</div>
+            <div style="text-align: left;">
+              <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Sekolah</div>
+              <div style="font-weight: 600; font-size: 0.95rem;">SMAGA PWT</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border);">
+          <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.7; max-width: 400px; margin: 0 auto;">
+            Website ini dibuat sebagai media pembelajaran matematika mengenai <strong style="color: var(--accent-light);">Logaritma</strong> untuk membantu teman-teman memahami konsep, rumus, dan sifat-sifat logaritma secara interaktif.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tech stack -->
+    <div class="card" style="padding: 28px; margin-top: 20px; text-align: center;">
+      <h3 style="font-weight: 700; font-size: 0.95rem; margin-bottom: 16px; color: var(--text-muted);">Dibuat dengan ❤️ menggunakan</h3>
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <span class="badge" style="background: rgba(108,99,255,0.1); color: var(--accent-light); padding: 6px 14px;">HTML5</span>
+        <span class="badge" style="background: rgba(0,188,212,0.1); color: #00bcd4; padding: 6px 14px;">CSS3</span>
+        <span class="badge" style="background: rgba(251,191,36,0.1); color: var(--warning); padding: 6px 14px;">JavaScript</span>
+        <span class="badge" style="background: rgba(74,222,128,0.1); color: var(--success); padding: 6px 14px;">Responsive</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer style="border-top: 1px solid var(--border); padding: 24px; text-align: center;">
+  <p style="color: var(--text-muted); font-size: 0.8rem;">© 2026 LogMath — Dibuat oleh <strong style="color: var(--text-secondary);">LukI Pratama</strong> | XE-6 | SMAGA PWT</p>
+</footer>
+
+<script>
+// ====== NAVIGATION ======
+function navigateTo(page) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + page).classList.add('active');
+
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('[data-nav="' + page + '"]').forEach(n => n.classList.add('active'));
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ====== MOBILE MENU ======
+function toggleMobileMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+// ====== ACCORDION ======
+function toggleAccordion(header) {
+  const content = header.nextElementSibling;
+  const arrow = header.querySelector('.accordion-arrow');
+  content.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+// ====== PARTICLES ======
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 6 + 's';
+    p.style.animationDuration = (4 + Math.random() * 4) + 's';
+    p.style.width = (2 + Math.random() * 4) + 'px';
+    p.style.height = p.style.width;
+    container.appendChild(p);
+  }
+}
+createParticles();
+
+// ====== QUIZ DATA ======
+const quizData = {
+  easy: [
+    { q: 'Berapakah nilai ²log 8?', options: ['2', '3', '4', '6'], answer: 1, explanation: '²log 8 = ²log 2³ = 3, karena 2³ = 8' },
+    { q: 'Berapakah nilai ⁵log 1?', options: ['0', '1', '5', '-1'], answer: 0, explanation: 'ᵃlog 1 = 0 untuk semua basis a, karena a⁰ = 1' },
+    { q: 'Berapakah nilai ³log 3?', options: ['0', '3', '1', '9'], answer: 2, explanation: 'ᵃlog a = 1, karena 3¹ = 3' },
+    { q: 'Berapakah nilai ¹⁰log 100?', options: ['1', '10', '2', '100'], answer: 2, explanation: '¹⁰log 100 = ¹⁰log 10² = 2' },
+    { q: 'Berapakah nilai ²log 16?', options: ['2', '3', '4', '8'], answer: 2, explanation: '²log 16 = ²log 2⁴ = 4, karena 2⁴ = 16' },
+    { q: 'Berapakah nilai ⁴log 64?', options: ['2', '3', '4', '16'], answer: 1, explanation: '⁴log 64 = ⁴log 4³ = 3, karena 4³ = 64' },
+    { q: 'Berapakah nilai ²log 32?', options: ['3', '4', '5', '6'], answer: 2, explanation: '²log 32 = ²log 2⁵ = 5, karena 2⁵ = 32' },
+    { q: 'Jika ²log x = 4, berapakah x?', options: ['4', '8', '16', '32'], answer: 2, explanation: '²log x = 4 → x = 2⁴ = 16' },
+    { q: 'Berapakah nilai ¹⁰log 1000?', options: ['1', '2', '3', '10'], answer: 2, explanation: '¹⁰log 1000 = ¹⁰log 10³ = 3' },
+    { q: 'Berapakah nilai ³log 81?', options: ['2', '3', '4', '9'], answer: 2, explanation: '³log 81 = ³log 3⁴ = 4, karena 3⁴ = 81' }
+  ],
+  medium: [
+    { q: 'Hitunglah ²log 4 + ²log 8!', options: ['3', '5', '7', '12'], answer: 1, explanation: '²log 4 + ²log 8 = 2 + 3 = 5' },
+    { q: 'Sederhanakan ²log 32 − ²log 4!', options: ['1', '2', '3', '4'], answer: 2, explanation: '²log 32 − ²log 4 = ²log(32/4) = ²log 8 = 3' },
+    { q: 'Berapakah nilai ²log 4 × ⁴log 8?', options: ['2', '3', '4', '6'], answer: 1, explanation: '²log 4 × ⁴log 8 = ²log 8 = 3 (sifat rantai)' },
+    { q: 'Hitunglah ³log 27 + ³log 9!', options: ['3', '4', '5', '6'], answer: 2, explanation: '³log 27 + ³log 9 = 3 + 2 = 5' },
+    { q: 'Jika ²log 3 = a, maka ²log 12 = ...', options: ['a + 2', '2a', '3a', 'a + 1'], answer: 0, explanation: '²log 12 = ²log(4×3) = ²log 4 + ²log 3 = 2 + a' },
+    { q: 'Berapakah nilai ⁴log 2?', options: ['1/4', '1/2', '2', '4'], answer: 1, explanation: '⁴log 2 = ²²log 2 = (1/2)·²log 2 = 1/2' },
+    { q: 'Hitunglah ²log 48 − ²log 6!', options: ['2', '3', '4', '8'], answer: 1, explanation: '²log 48 − ²log 6 = ²log(48/6) = ²log 8 = 3' },
+    { q: 'Jika ²log 5 = p, maka ⁴log 5 = ...', options: ['p/2', '2p', 'p', 'p²'], answer: 0, explanation: '⁴log 5 = ²log 5 / ²log 4 = p/2' },
+    { q: 'Berapakah nilai ⁹log 27?', options: ['1/3', '2/3', '3/2', '3'], answer: 2, explanation: '⁹log 27 = ³²log 3³ = (3/2)·³log 3 = 3/2' },
+    { q: 'Hitunglah ²log 2⁵!', options: ['2', '3', '4', '5'], answer: 3, explanation: '²log 2⁵ = 5·²log 2 = 5×1 = 5 (sifat perpangkatan)' }
+  ],
+  hard: [
+    { q: 'Jika ²log 3 = a dan ²log 5 = b, maka ²log 45 = ...', options: ['a + b', '2a + b', 'a + 2b', 'ab'], answer: 1, explanation: '²log 45 = ²log(9×5) = ²log 3² + ²log 5 = 2a + b' },
+    { q: 'Hitunglah ²log 3 × ³log 5 × ⁵log 8!', options: ['1', '2', '3', '4'], answer: 2, explanation: 'Rantai: ²log 3 × ³log 5 × ⁵log 8 = ²log 8 = 3' },
+    { q: 'Jika log 2 = 0.301 dan log 3 = 0.477, berapakah log 12?', options: ['0.778', '1.079', '0.954', '1.255'], answer: 1, explanation: 'log 12 = log(4×3) = log 2² + log 3 = 2(0.301) + 0.477 = 1.079' },
+    { q: 'Nilai x yang memenuhi ²log(x−1) = 3 adalah...', options: ['7', '8', '9', '10'], answer: 2, explanation: '²log(x−1) = 3 → x−1 = 2³ = 8 → x = 9' },
+    { q: 'Berapakah nilai ²log 6 + ²log 8 − ²log 3?', options: ['2', '3', '4', '5'], answer: 2, explanation: '²log 6 + ²log 8 − ²log 3 = ²log(6×8/3) = ²log 16 = 4' },
+    { q: 'Jika ²⁷log x = 2/3, maka x = ...', options: ['3', '9', '18', '27'], answer: 1, explanation: '²⁷log x = 2/3 → x = 27^(2/3) = (3³)^(2/3) = 3² = 9' },
+    { q: 'Hitunglah ⁸log 4 + ⁸log 16!', options: ['1', '2', '7/3', '8/3'], answer: 1, explanation: '⁸log 4 = 2/3, ⁸log 16 = 4/3 → 2/3 + 4/3 = 6/3 = 2' },
+    { q: 'Nilai ²log 3 × ³log 4 × ⁴log 5 × ⁵log 32 = ...', options: ['3', '4', '5', '6'], answer: 2, explanation: 'Rantai: = ²log 32 = 5' },
+    { q: 'Jika ³log 2 = a, maka ¹²log 16 = ...', options: ['4a/(a+2)', '4/(a+2)', '4a/(2a+1)', '2a/(a+1)'], answer: 0, explanation: '¹²log 16 = ³log 16/³log 12 = 4·³log 2/(³log 4+³log 3) = 4a/(2a+1)... sebenarnya ³log 12 = ³log(4×3) = 2a+1, jadi = 4a/(2a+1). Koreksi: jawabannya 4a/(2a+1).' },
+    { q: 'Hitunglah ²log(√8 × ⁴√16)!', options: ['2', '5/2', '3', '7/2'], answer: 3, explanation: '√8 = 2^(3/2), ⁴√16 = 16^(1/4) = 2, jadi ²log(2^(3/2) × 2) = ²log 2^(5/2) = 5/2. Koreksi: ⁴√16 = 2, √8×2 = 2√8 = 2·2^(3/2) = 2^(5/2), ²log 2^(5/2) = 5/2.' }
+  ]
+};
+
+// ====== QUIZ ENGINE ======
+let currentDifficulty = '';
+let currentQuestions = [];
+let currentIndex = 0;
+let score = 0;
+let answered = false;
+
+function startQuiz(difficulty) {
+  currentDifficulty = difficulty;
+  currentQuestions = [...quizData[difficulty]];
+  currentIndex = 0;
+  score = 0;
+  answered = false;
+
+  document.getElementById('difficulty-select').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  document.getElementById('result-area').style.display = 'none';
+
+  const badge = document.getElementById('quiz-badge');
+  badge.textContent = difficulty.toUpperCase();
+  badge.className = 'badge badge-' + difficulty;
+
+  document.getElementById('q-total').textContent = currentQuestions.length;
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+  document.getElementById('q-current').textContent = currentIndex + 1;
+  document.getElementById('quiz-progress').style.width = ((currentIndex + 1) / currentQuestions.length * 100) + '%';
+  document.getElementById('question-text').textContent = q.q;
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-option';
+    div.textContent = String.fromCharCode(65 + i) + '. ' + opt;
+    div.onclick = () => selectAnswer(i);
+    container.appendChild(div);
+  });
+
+  document.getElementById('feedback-area').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+}
+
+function selectAnswer(index) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  const options = document.querySelectorAll('.quiz-option');
+
+  options.forEach((opt, i) => {
+    opt.style.cursor = 'default';
+    if (i === q.answer) opt.classList.add('correct');
+    if (i === index && i !== q.answer) opt.classList.add('incorrect');
+    opt.classList.add('selected');
+  });
+
+  const isCorrect = index === q.answer;
+  if (isCorrect) score++;
+
+  const feedbackArea = document.getElementById('feedback-area');
+  const feedbackText = document.getElementById('feedback-text');
+  const feedbackExpl = document.getElementById('feedback-explanation');
+
+  feedbackArea.style.display = 'block';
+  if (isCorrect) {
+    feedbackArea.style.background = 'rgba(74,222,128,0.08)';
+    feedbackArea.style.border = '1px solid rgba(74,222,128,0.2)';
+    feedbackText.style.color = '#4ade80';
+    feedbackText.textContent = '✅ Benar! Hebat!';
+  } else {
+    feedbackArea.style.background = 'rgba(248,113,113,0.08)';
+    feedbackArea.style.border = '1px solid rgba(248,113,113,0.2)';
+    feedbackText.style.color = '#f87171';
+    feedbackText.textContent = '❌ Kurang tepat!';
+  }
+  feedbackExpl.textContent = q.explanation;
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.style.display = 'inline-flex';
+  if (currentIndex === currentQuestions.length - 1) {
+    nextBtn.textContent = '📊 Lihat Hasil';
+  } else {
+    nextBtn.textContent = 'Soal Berikutnya →';
+  }
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) {
+    showResult();
+  } else {
+    showQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('result-area').style.display = 'block';
+
+  const total = currentQuestions.length;
+  const percent = Math.round((score / total) * 100);
+
+  document.getElementById('score-display').textContent = score + '/' + total;
+  document.getElementById('correct-count').textContent = score;
+  document.getElementById('wrong-count').textContent = total - score;
+  document.getElementById('score-percent').textContent = percent + '%';
+
+  let msg = '';
+  if (percent === 100) msg = '🌟 Sempurna! Kamu menguasai logaritma dengan sangat baik!';
+  else if (percent >= 80) msg = '🎯 Bagus sekali! Pemahaman kamu sudah sangat baik!';
+  else if (percent >= 60) msg = '👍 Cukup baik! Terus berlatih untuk hasil yang lebih baik!';
+  else if (percent >= 40) msg = '📖 Pelajari kembali materi dan coba lagi ya!';
+  else msg = '💪 Jangan menyerah! Buka halaman Rumus dan pelajari lagi!';
+
+  document.getElementById('score-message').textContent = msg;
+}
+
+function resetQuiz() {
+  document.getElementById('difficulty-select').style.display = 'grid';
+  document.getElementById('quiz-area').style.display = 'none';
+  document.getElementById('result-area').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
